@@ -95,17 +95,19 @@ export PATH="${PROJECT_DIR}/node_modules/.bin:${PATH}"
 
 echo "Publishing the app"
 # Publish to heroku_output
-dotnet build ${PROJECT_JSON_FILE}
+dotnet publish ${PROJECT_JSON_FILE} --output ${BUILD_DIR}/heroku_output --configuration ${CORE_CONFIGURATION}
 
 echo "Publish Successed"
 
 mkdir -p ${BUILD_DIR}/.profile.d
 cp -n ${BUILDPACK_DIR}/.profile.d/* ${BUILD_DIR}/.profile.d/
 
+PROJECT_NAME=$(basename ${PROJECT_JSON_FILE%.*})
+echo "Project name: ${PROJECT_NAME}"
 if [ -e ${SRC_DIR}/Procfile ]; then
 	cp ${SRC_DIR}/Procfile ${BUILD_DIR}
 else
 	cat << EOT >> ${BUILD_DIR}/Procfile
-web: dotnet run ${PROJECT_JSON_FILE} --server.urls http://+:\$PORT ${CORE_ENVIRONMENT}
+web: cd \$HOME/heroku_output && dotnet ./${PROJECT_NAME}.dll --server.urls http://+:\$PORT ${CORE_ENVIRONMENT}
 EOT
 fi
