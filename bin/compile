@@ -88,14 +88,14 @@ if [[ -f $PROJECT_JSON_FILE ]]; then
 fi
 
 echo "Restoring the packages"
-dotnet restore ${SRC_DIR}
+dotnet restore ${PROJECT_JSON_FILE}
 
 # configure some npm command during building
 export PATH="${PROJECT_DIR}/node_modules/.bin:${PATH}"
 
 echo "Publishing the app"
 # Publish to heroku_output
-dotnet build ${SRC_DIR}
+dotnet build ${PROJECT_JSON_FILE}
 
 echo "Publish Successed"
 
@@ -106,6 +106,6 @@ if [ -e ${SRC_DIR}/Procfile ]; then
 	cp ${SRC_DIR}/Procfile ${BUILD_DIR}
 else
 	cat << EOT >> ${BUILD_DIR}/Procfile
-web: cd ${SRC_DIR} && dotnet run --server.urls http://+:\$PORT ${CORE_ENVIRONMENT}
+web: dotnet run ${PROJECT_JSON_FILE} --server.urls http://+:\$PORT ${CORE_ENVIRONMENT}
 EOT
 fi
